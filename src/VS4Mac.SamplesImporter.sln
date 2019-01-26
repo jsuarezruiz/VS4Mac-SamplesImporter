@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS4Mac.SamplesImporter", "VS4Mac.SamplesImporter\VS4Mac.SamplesImporter.csproj", "{4741806A-3F0F-4870-9174-4A8A4FA3199F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS4Mac.SamplesImporter.Tests", "VS4Mac.SamplesImporter.Tests\VS4Mac.SamplesImporter.Tests.csproj", "{F52BB677-0808-4011-B22B-0B06E49D1975}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4741806A-3F0F-4870-9174-4A8A4FA3199F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4741806A-3F0F-4870-9174-4A8A4FA3199F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4741806A-3F0F-4870-9174-4A8A4FA3199F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4741806A-3F0F-4870-9174-4A8A4FA3199F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F52BB677-0808-4011-B22B-0B06E49D1975}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F52BB677-0808-4011-B22B-0B06E49D1975}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F52BB677-0808-4011-B22B-0B06E49D1975}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F52BB677-0808-4011-B22B-0B06E49D1975}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

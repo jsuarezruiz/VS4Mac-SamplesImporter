@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Addin
+    id = "com.jsuarezruiz.samplesimporter">
+    <Header>
+        <Name>Samples Importer</Name>
+        <Description>Import easily samples to Visual Studio.</Description>
+        <Author>Javier Suárez</Author>
+        <Copyright>Javier Suárez</Copyright>
+        <Url>https://github.com/jsuarezruiz/VSMac-SamplesImporter</Url>
+    </Header>       
+    <Extension 
+        path="/MonoDevelop/Ide/Commands">
+        <Command
+            _label="Samples Importer" 
+             id="VS4Mac.SamplesImporter.Commands.SamplesImporterCommand"
+             defaultHandler="VS4Mac.SamplesImporter.Commands.SamplesImporterCommand"/>
+    </Extension>
+    <Extension 
+        path = "/MonoDevelop/Ide/MainMenu/Tools">
+        <CommandItem 
+            id="VS4Mac.SamplesImporter.Commands.SamplesImporterCommand"/>
+    </Extension> 
+</Addin>
