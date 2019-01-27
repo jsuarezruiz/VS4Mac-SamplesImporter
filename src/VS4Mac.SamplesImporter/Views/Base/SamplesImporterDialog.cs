@@ -289,6 +289,8 @@ namespace VS4Mac.SamplesImporter.Views.Base
                     _tagsBox.PackStart(tagWidget);
                 }
             }
+
+            _continueButton.Sensitive = !string.IsNullOrEmpty(_controller.SelectedSample.Url);
         }
 
         void Loading(bool isLoading)
