@@ -1,61 +1,165 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
+using Octokit;
 using VS4Mac.SamplesImporter.Controllers.Base;
 using VS4Mac.SamplesImporter.Models;
 using VS4Mac.SamplesImporter.Services;
-using VS4Mac.SamplesImporter.Views.Base;
+using VS4Mac.SamplesImporter.Views;
 
 namespace VS4Mac.SamplesImporter.Controllers
 {
-    public class SamplesImporterController : IController
+	public class SamplesImporterController : IController
     {
         readonly ISamplesImporterView _view;
-        readonly SampleImporterService _service;
+
+        readonly SampleImporterService _sampleImporterService;
+		readonly DownloaderService _downloaderService;
+		readonly SettingsService _settingsService;
+		readonly NetworkStatusService _networkStatusService;
 
         public SamplesImporterController(ISamplesImporterView view)
         {
             _view = view;
-            _service = new SampleImporterService();
 
-            view.SetController(this);
+			_sampleImporterService = new SampleImporterService();
+			_downloaderService = new DownloaderService();
+			_settingsService = new SettingsService();
+			_networkStatusService = new NetworkStatusService();
+
+			Samples = new List<Sample>();
+
+			Init();
+
+			view.SetController(this);
         }
 
-        public Sample SelectedSample { get; set; }
+		public List<Sample> Samples { get; set; }
+		public Sample SelectedSample { get; set; }
 
-        public List<Sample> LoadData()
-        {
-            return _service.GetSamples();
-        }
+		public List<SampleRepository> LoadSampleRepositories()
+		{
+			return _sampleImporterService.GetSampleRepositories();
+		}
 
-        public List<Sample> FilterData(string filter)
+		public async Task<List<Sample>> LoadSamplesAsync(string sampleRepositoryId, CancellationToken cancellationToken)
+		{
+			Samples.Clear();
+
+			if (string.IsNullOrEmpty(_sampleImporterService.Token))
+			{
+				throw new Exception("It is necessary to add a GitHub Personal Access Token in the Preferences of Visual Studio.");
+			}
+
+			if(!_networkStatusService.IsConnectedToInternet())
+			{
+				throw new Exception("There is no Internet conection.");
+			}
+
+			var samples = await _sampleImporterService.GetSamplesAsync(sampleRepositoryId, cancellationToken);
+
+			Samples = samples;
+
+			return samples;
+		}
+
+		public async Task UpdateSampleDetail()
+		{
+			var sampleDetails = await _sampleImporterService.GetSampleDetailsAsync(SelectedSample);
+
+			SelectedSample.Id = sampleDetails.Id;
+			SelectedSample.IsFullApplication = sampleDetails.IsFullApplication;
+			SelectedSample.Level = sampleDetails.Level;
+			SelectedSample.LicenseRequirement = sampleDetails.LicenseRequirement;
+			SelectedSample.SupportedPlatforms = sampleDetails.SupportedPlatforms;
+			SelectedSample.Tags = sampleDetails.Tags;
+			SelectedSample.Brief = sampleDetails.Brief;
+
+			await LoadSamplePicturesAsync();
+		}
+
+		public async Task LoadSamplePicturesAsync()
+		{
+			var pictures = await _sampleImporterService.GetSamplePicturesAsync(SelectedSample);
+			SelectedSample.Pictures = pictures;
+		}
+
+		public Stream LoadPicture(string url)
+		{
+			try
+			{
+				WebClient wc = new WebClient();
+				byte[] bytes = wc.DownloadData(url);
+				MemoryStream ms = new MemoryStream(bytes);
+
+				return ms;
+			}
+			catch
+			{
+				return null;
+			}
+		}
+
+		public List<Sample> FilterData(string filter)
         {
-            return _service.GetSamples().Where(s => s.Name.Contains(filter)).ToList();
+			List<Sample> filteredSample = new List<Sample>();
+
+			foreach(var sample in Samples)
+			{
+				if (sample.Name.Contains(filter))
+					filteredSample.Add(sample);
+
+				if(!string.IsNullOrEmpty(sample.Tags) && sample.Tags.Split(',').Any(t => t.Contains(filter)))
+					filteredSample.Add(sample);
+			}
+
+			return filteredSample;
         }
 
         public async Task<string> DownloadSampleAsync()
         {
             try
             {
-                string zipProjectPath = Path.Combine(UserProfile.Current.TempDir, $"{SelectedSample.Name}.zip");
-                string projectPath = Path.Combine(UserProfile.Current.TempDir, SelectedSample.Name);
+				string projectPath = string.Empty;
+                string projectsTempPath = UserProfile.Current.TempDir;
 
-                if (!File.Exists(zipProjectPath))
-                    await _service.DownloadSampleAsync(new Uri(SelectedSample.Url), zipProjectPath);
+				var content = await _sampleImporterService.GetSampleContentAsync(SelectedSample);
 
-                if (!Directory.Exists(projectPath))
-                {
-                    Directory.CreateDirectory(projectPath);
+				var folders = content.Where(c => c.Type == ContentType.Dir);
 
-                    ZipFile.ExtractToDirectory(zipProjectPath, projectPath);
-                }
+				foreach(var folder in folders)
+				{
+					string directoryPath = Path.Combine(projectsTempPath, folder.Path);
 
-                return projectPath;
+					if (!Directory.Exists(directoryPath))
+					{
+						Directory.CreateDirectory(directoryPath);
+					}
+				}
+
+				var files = content.Where(c => c.Type == ContentType.File);
+
+				foreach (var file in files)
+				{
+					string filePath = Path.Combine(projectsTempPath, file.Path);
+
+					await _downloaderService.DownloadFileAsync(file.DownloadUrl, filePath, CancellationToken.None);
+				}
+
+				var projectFile = files.FirstOrDefault(c => c.Path.EndsWith(".sln", StringComparison.InvariantCultureIgnoreCase));
+
+				if (projectFile != null)
+				{
+					projectPath = Path.Combine(projectsTempPath, projectFile.Path);
+				}
+
+				return projectPath;
             }
             catch(Exception ex)
             {
@@ -67,11 +171,16 @@ namespace VS4Mac.SamplesImporter.Controllers
 
         public async Task OpenSolutionAsync(string solutionPath)
         {
-            var solutions = Directory.GetFiles(solutionPath, "*.sln", SearchOption.AllDirectories);
-            var solution = solutions.FirstOrDefault();
+            if(!string.IsNullOrEmpty(solutionPath))
+                await IdeApp.Workspace.OpenWorkspaceItem(new FilePath(solutionPath), true);
+		}
 
-            if(!string.IsNullOrEmpty(solution))
-                await IdeApp.Workspace.OpenWorkspaceItem(new FilePath(solution), true);
-        }
-    }
+		internal void Init()
+		{
+			var settings = _settingsService.Load();
+
+			_sampleImporterService.Init(settings.Token);
+			_downloaderService.Init(settings.Token);
+		}
+	}
 }

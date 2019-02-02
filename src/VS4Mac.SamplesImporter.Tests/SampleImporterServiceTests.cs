@@ -3,7 +3,7 @@ using VS4Mac.SamplesImporter.Services;
 
 namespace VS4Mac.SamplesImporter.Tests
 {
-    [TestFixture]
+	[TestFixture]
     public class SampleImporterServiceTests
     {
         SampleImporterService _service;
@@ -14,12 +14,12 @@ namespace VS4Mac.SamplesImporter.Tests
             _service = new SampleImporterService();
         }
 
-        [Test]
-        public void GetSamplesTests()
-        {
-            var samples = _service.GetSamples();
+		[Test]
+		public void GetSampleRepositoriesTests()
+		{
+			var repositories = _service.GetSampleRepositories();
 
-            Assert.AreNotEqual(0, samples.Count);
-        }
+			Assert.AreNotEqual(0, repositories.Count);
+		}
     }
 }

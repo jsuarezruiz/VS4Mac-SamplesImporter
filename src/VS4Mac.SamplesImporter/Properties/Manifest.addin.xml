@@ -19,5 +19,12 @@
         path = "/MonoDevelop/Ide/MainMenu/Tools">
         <CommandItem 
             id="VS4Mac.SamplesImporter.Commands.SamplesImporterCommand"/>
-    </Extension> 
+    </Extension>     
+    <Extension 
+        path = "/MonoDevelop/Ide/GlobalOptionsDialog/Other">
+        <Section 
+            id = "Samples Importer" 
+            _label = "Samples Importer" 
+            class = "VS4Mac.SamplesImporter.Views.SamplesImporterSettingsPanel" />
+    </Extension>
 </Addin>
