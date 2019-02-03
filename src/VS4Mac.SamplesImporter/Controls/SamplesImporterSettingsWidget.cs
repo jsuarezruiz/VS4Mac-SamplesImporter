@@ -48,7 +48,12 @@ namespace VS4Mac.SamplesImporter.Controls
 
 			_pathDescriptionLabel = new Label("Samples folder");
 			_pathBox = new HBox();
-			_pathEntry = new TextEntry();
+
+			_pathEntry = new TextEntry
+			{
+				ReadOnly = true
+			};
+
 			_browseButton = new Button("Browse Folder");
 		}
 
