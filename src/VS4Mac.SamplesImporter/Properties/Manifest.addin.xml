@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Addin
-    id = "com.jsuarezruiz.samplesimporter">
+    id = "MonoDevelop.SamplesImporter">
     <Header>
         <Name>Samples Importer</Name>
         <Description>Import easily samples to Visual Studio for macOS.</Description>

@@ -6,11 +6,11 @@ using Mono.Addins.Description;
 [assembly: Addin(
     "SamplesImporter",
     Namespace = "MonoDevelop",
-    Version = "0.1", 
+    Version = "0.2", 
     Category = "IDE extensions"
 )]
 
-[assembly: AddinName("VS4Mac.SamplesImporter")]
+[assembly: AddinName("Samples Importer")]
 [assembly: AddinCategory("IDE extensions")]
 [assembly: AddinDescription("Samples Importer is a Visual Studio for macOS addin to explorer and directly open Xamarin samples from the IDE.")]
 [assembly: AddinAuthor("Javier Suárez Ruiz")]
