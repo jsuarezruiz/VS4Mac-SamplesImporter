@@ -3,7 +3,7 @@
     id = "com.jsuarezruiz.samplesimporter">
     <Header>
         <Name>Samples Importer</Name>
-        <Description>Import easily samples to Visual Studio.</Description>
+        <Description>Import easily samples to Visual Studio for macOS.</Description>
         <Author>Javier Suárez</Author>
         <Copyright>Javier Suárez</Copyright>
         <Url>https://github.com/jsuarezruiz/VSMac-SamplesImporter</Url>
