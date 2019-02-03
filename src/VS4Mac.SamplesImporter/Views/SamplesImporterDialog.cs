@@ -324,9 +324,15 @@ namespace VS4Mac.SamplesImporter.Views
 
                     _platformsBox.PackStart(platformLabel);
                 }
-            }
+			}
+			else
+			{
+				var platformLabel = new Label($"- {_controller.SelectedSampleRepository.Platform}");
 
-            _tagsBox.Clear();
+				_platformsBox.PackStart(platformLabel);
+			}
+
+			_tagsBox.Clear();
 
             if (!string.IsNullOrEmpty(_controller.SelectedSample.Tags))
             {
@@ -381,7 +387,8 @@ namespace VS4Mac.SamplesImporter.Views
 
 			if (_feedBox.SelectedItem is SampleRepository sampleRepository)
 			{
-				await LoadDataAsync(sampleRepository.SampleRepositoryId);
+				_controller.SelectedSampleRepository = sampleRepository;
+				await LoadDataAsync(_controller.SelectedSampleRepository.SampleRepositoryId);
 			}
 		}
 

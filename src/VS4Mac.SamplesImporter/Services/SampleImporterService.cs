@@ -32,10 +32,10 @@ namespace VS4Mac.SamplesImporter.Services
 		public List<SampleRepository> GetSampleRepositories()
 		{
 			return new List<SampleRepository> {
-				new SampleRepository { SampleRepositoryId = "monodroid-samples", Name = "Xamarin.Android" },
-				new SampleRepository { SampleRepositoryId = "ios-samples", Name = "Xamarin.iOS" },
-				new SampleRepository { SampleRepositoryId = "xamarin-forms-samples", Name = "Xamarin.Forms" },
-				new SampleRepository { SampleRepositoryId = "mac-samples", Name = "Xamarin.Mac" }
+				new SampleRepository { SampleRepositoryId = "monodroid-samples", Name = "Xamarin.Android", Platform = "Android" },
+				new SampleRepository { SampleRepositoryId = "ios-samples", Name = "Xamarin.iOS", Platform = "iOS" },
+				new SampleRepository { SampleRepositoryId = "xamarin-forms-samples", Name = "Xamarin.Forms", Platform = "Xamarin.Forms" },
+				new SampleRepository { SampleRepositoryId = "mac-samples", Name = "Xamarin.Mac", Platform = "macOS" }
 			};
 		}
 

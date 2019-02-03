@@ -45,6 +45,7 @@ namespace VS4Mac.SamplesImporter.Controllers
 
 		public List<Sample> Samples { get; set; }
 		public Sample SelectedSample { get; set; }
+		public SampleRepository SelectedSampleRepository { get; set; }
 
 		public List<SampleRepository> LoadSampleRepositories()
 		{
