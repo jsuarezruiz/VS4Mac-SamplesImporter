@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoDevelop.Components;
+using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
+using MonoDevelop.Ide.ProgressMonitoring;
 using VS4Mac.SamplesImporter.Controllers;
 using VS4Mac.SamplesImporter.Controllers.Base;
 using VS4Mac.SamplesImporter.Controls;
@@ -413,32 +415,42 @@ namespace VS4Mac.SamplesImporter.Views
             Close();
         }
 
-        async void OnContinueButtonClicked(object sender, System.EventArgs e)
+        async void OnContinueButtonClicked(object sender, EventArgs e)
         {
             if (_controller.SelectedSample == null)
                 return;
 
-            var progressMonitor = IdeApp.Workbench.ProgressMonitors.GetStatusProgressMonitor("Downloading project...", Stock.StatusSolutionOperation, false, true, false);
+			ProgressMonitor progressMonitor = new MessageDialogProgressMonitor(true, false, true, true);
 
-            Loading(true);
+			Loading(true);
 
-            var projectPath = await _controller.DownloadSampleAsync();
+            var projectPath = await _controller.DownloadSampleAsync(progressMonitor);
 
             Loading(false);
+          
+			if (string.IsNullOrWhiteSpace(projectPath))
+            {
+				var errorMessage = "An error has occurred downloading the sample.";
+				progressMonitor.ReportError(errorMessage);
+				MessageService.ShowError(errorMessage);
+			}
+			else
+			{
+				progressMonitor.ReportSuccess("Sample downloaded.");
+			}
 
 			progressMonitor.EndTask();
 			progressMonitor.Dispose();
 
-			if (!string.IsNullOrWhiteSpace(projectPath))
-            {
-                Respond(Command.Ok);
-                Close();
-                await _controller.OpenSolutionAsync(projectPath);
-			}
-			else
+			bool downloaded = !string.IsNullOrWhiteSpace(projectPath);
+
+			if (downloaded)
 			{
-				MessageService.ShowError("An error has occurred downloading the sample.");
+				Respond(Command.Ok);
+				Close();
+
+				await _controller.OpenSolutionAsync(projectPath);
 			}
-        }
+		}
     }
 }

@@ -24,6 +24,8 @@ namespace VS4Mac.SamplesImporter.Controllers
 		readonly SettingsService _settingsService;
 		readonly NetworkStatusService _networkStatusService;
 
+		string _projectsPath;
+
         public SamplesImporterController(ISamplesImporterView view)
         {
             _view = view;
@@ -34,6 +36,7 @@ namespace VS4Mac.SamplesImporter.Controllers
 			_networkStatusService = new NetworkStatusService();
 
 			Samples = new List<Sample>();
+			_projectsPath = string.Empty;
 
 			Init();
 
@@ -122,23 +125,26 @@ namespace VS4Mac.SamplesImporter.Controllers
 			return filteredSample;
         }
 
-        public async Task<string> DownloadSampleAsync()
+        public async Task<string> DownloadSampleAsync(ProgressMonitor progressMonitor = null)
         {
             try
             {
 				string projectPath = string.Empty;
-                string projectsTempPath = UserProfile.Current.TempDir;
 
 				var content = await _sampleImporterService.GetSampleContentAsync(SelectedSample);
+
+				progressMonitor?.BeginTask("Downloading...", content.Count);
 
 				var folders = content.Where(c => c.Type == ContentType.Dir);
 
 				foreach(var folder in folders)
 				{
-					string directoryPath = Path.Combine(projectsTempPath, folder.Path);
+					string directoryPath = Path.Combine(_projectsPath, folder.Path);
 
 					if (!Directory.Exists(directoryPath))
 					{
+						progressMonitor?.Step();
+						progressMonitor?.Log.WriteLine("Creating folder" + ": " + directoryPath);
 						Directory.CreateDirectory(directoryPath);
 					}
 				}
@@ -147,8 +153,9 @@ namespace VS4Mac.SamplesImporter.Controllers
 
 				foreach (var file in files)
 				{
-					string filePath = Path.Combine(projectsTempPath, file.Path);
-
+					string filePath = Path.Combine(_projectsPath, file.Path);
+					progressMonitor?.Step();
+					progressMonitor?.Log.WriteLine("Downloading file" + ": " + filePath);
 					await _downloaderService.DownloadFileAsync(file.DownloadUrl, filePath, CancellationToken.None);
 				}
 
@@ -156,7 +163,7 @@ namespace VS4Mac.SamplesImporter.Controllers
 
 				if (projectFile != null)
 				{
-					projectPath = Path.Combine(projectsTempPath, projectFile.Path);
+					projectPath = Path.Combine(_projectsPath, projectFile.Path);
 				}
 
 				return projectPath;
@@ -181,6 +188,7 @@ namespace VS4Mac.SamplesImporter.Controllers
 
 			_sampleImporterService.Init(settings.Token);
 			_downloaderService.Init(settings.Token);
+			_projectsPath = settings.SamplesPath;
 		}
 	}
 }

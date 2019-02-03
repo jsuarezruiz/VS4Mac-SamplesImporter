@@ -25,7 +25,7 @@ namespace VS4Mac.SamplesImporter.Services
 			XDocument doc = new XDocument();
 			doc.Add(new XElement("SamplesImporter"));
 			doc.Root.Add(new XElement("Token", settings.Token));
-
+			doc.Root.Add(new XElement("SamplesPath", settings.SamplesPath));
 			doc.Save(ConfigurationPath);
 		}
 
@@ -46,6 +46,13 @@ namespace VS4Mac.SamplesImporter.Services
 			if (token != null)
 			{
 				settings.Token = token.Value;
+			}
+
+			var samplesPath = document.Root.Element("SamplesPath");
+
+			if (samplesPath != null)
+			{
+				settings.SamplesPath = samplesPath.Value;
 			}
 
 			return settings;

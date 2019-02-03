@@ -11,6 +11,10 @@ namespace VS4Mac.SamplesImporter.Controls
 		LinkLabel _createTokenLink;
 		Label _tokenLabel;
 		TextEntry _tokenEntry;
+		Label _pathDescriptionLabel;
+		HBox _pathBox;
+		TextEntry _pathEntry;
+		Button _browseButton;
 
 		SettingsService _settingsService;
 
@@ -18,6 +22,7 @@ namespace VS4Mac.SamplesImporter.Controls
 		{
 			Init();
 			BuildGui();
+			AttachEvents();
 			LoadData();
 		}
 
@@ -40,6 +45,11 @@ namespace VS4Mac.SamplesImporter.Controls
 
 			_tokenLabel = new Label("Token");
 			_tokenEntry = new TextEntry();
+
+			_pathDescriptionLabel = new Label("Samples folder");
+			_pathBox = new HBox();
+			_pathEntry = new TextEntry();
+			_browseButton = new Button("Browse Folder");
 		}
 
 		void BuildGui()
@@ -47,25 +57,51 @@ namespace VS4Mac.SamplesImporter.Controls
 			_linkBox.PackStart(_tokenDescriptionLabel);
 			_linkBox.PackStart(_createTokenLink);
 
+			_pathBox.PackStart(_pathEntry, true);
+			_pathBox.PackEnd(_browseButton, false);
+
 			PackStart(_linkBox);
 			PackStart(_tokenLabel);
 			PackStart(_tokenEntry);
+			PackStart(_pathDescriptionLabel);
+			PackStart(_pathBox);
+		}
+
+		void AttachEvents()
+		{
+			_browseButton.Clicked += OnBrowse;
 		}
 
 		void LoadData()
 		{
 			var settings = _settingsService.Load();
 			_tokenEntry.Text = settings.Token;
+			_pathEntry.Text = settings.SamplesPath;
 		}
 
 		public void ApplyChanges()
 		{
 			Models.Settings settings = new Models.Settings
 			{
-				Token = _tokenEntry.Text
+				Token = _tokenEntry.Text,
+				SamplesPath = _pathEntry.Text
 			};
 
 			_settingsService.Save(settings);
+		}
+
+		void OnBrowse(object sender, EventArgs args)
+		{
+			using (SelectFolderDialog folderSelect = new SelectFolderDialog("Browse Folder"))
+			{
+				folderSelect.Multiselect = false;
+				folderSelect.CanCreateFolders = true;
+
+				if (folderSelect.Run(MessageDialog.RootWindow))
+				{
+					_pathEntry.Text = folderSelect.Folder;
+				}
+			}
 		}
 	}
 }
