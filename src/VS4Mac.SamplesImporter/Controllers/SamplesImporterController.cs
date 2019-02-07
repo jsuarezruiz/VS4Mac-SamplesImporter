@@ -9,6 +9,7 @@ using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using Octokit;
 using VS4Mac.SamplesImporter.Controllers.Base;
+using VS4Mac.SamplesImporter.Extensions;
 using VS4Mac.SamplesImporter.Models;
 using VS4Mac.SamplesImporter.Services;
 using VS4Mac.SamplesImporter.Views;
@@ -116,7 +117,7 @@ namespace VS4Mac.SamplesImporter.Controllers
 
 			foreach(var sample in Samples)
 			{
-				if (sample.Name.Contains(filter))
+				if (sample.Name.Contains(filter, StringComparison.InvariantCultureIgnoreCase))
 					filteredSample.Add(sample);
 
 				if(!string.IsNullOrEmpty(sample.Tags) && sample.Tags.Split(',').Any(t => t.Contains(filter)))
