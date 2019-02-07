@@ -261,7 +261,7 @@ namespace VS4Mac.SamplesImporter.Views
 			_feedBox.SelectedIndex = 2;
 		}
 
-		internal async Task LoadDataAsync(string sampleRepositoryId)
+		internal async Task LoadDataAsync(string sampleOwnerId, string sampleRepositoryId)
 		{
 			var progressMonitor = IdeApp.Workbench.ProgressMonitors.GetStatusProgressMonitor("Loading samples...", Stock.StatusSolutionOperation, false, true, false);
 
@@ -269,7 +269,7 @@ namespace VS4Mac.SamplesImporter.Views
 			{
 				Loading(true);
 
-				var samples = await _controller.LoadSamplesAsync(sampleRepositoryId, CancellationToken.None);
+				var samples = await _controller.LoadSamplesAsync(sampleOwnerId, sampleRepositoryId, CancellationToken.None);
 
 				FillData(samples);
 
@@ -388,7 +388,7 @@ namespace VS4Mac.SamplesImporter.Views
 			if (_feedBox.SelectedItem is SampleRepository sampleRepository)
 			{
 				_controller.SelectedSampleRepository = sampleRepository;
-				await LoadDataAsync(_controller.SelectedSampleRepository.SampleRepositoryId);
+				await LoadDataAsync(_controller.SelectedSampleRepository.SampleOwnerId, _controller.SelectedSampleRepository.SampleRepositoryId);
 			}
 		}
 

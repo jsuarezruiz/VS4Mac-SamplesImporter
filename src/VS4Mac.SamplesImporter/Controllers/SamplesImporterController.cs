@@ -53,7 +53,7 @@ namespace VS4Mac.SamplesImporter.Controllers
 			return _sampleImporterService.GetSampleRepositories();
 		}
 
-		public async Task<List<Sample>> LoadSamplesAsync(string sampleRepositoryId, CancellationToken cancellationToken)
+		public async Task<List<Sample>> LoadSamplesAsync(string sampleOwnerId, string sampleRepositoryId, CancellationToken cancellationToken)
 		{
 			Samples.Clear();
 
@@ -67,7 +67,7 @@ namespace VS4Mac.SamplesImporter.Controllers
 				throw new Exception("There is no Internet conection.");
 			}
 
-			var samples = await _sampleImporterService.GetSamplesAsync(sampleRepositoryId, cancellationToken);
+			var samples = await _sampleImporterService.GetSamplesAsync(sampleOwnerId, sampleRepositoryId, cancellationToken);
 
 			Samples = samples;
 

@@ -32,14 +32,16 @@ namespace VS4Mac.SamplesImporter.Services
 		public List<SampleRepository> GetSampleRepositories()
 		{
 			return new List<SampleRepository> {
-				new SampleRepository { SampleRepositoryId = "monodroid-samples", Name = "Xamarin.Android", Platform = "Android" },
-				new SampleRepository { SampleRepositoryId = "ios-samples", Name = "Xamarin.iOS", Platform = "iOS" },
-				new SampleRepository { SampleRepositoryId = "xamarin-forms-samples", Name = "Xamarin.Forms", Platform = "Xamarin.Forms" },
-				new SampleRepository { SampleRepositoryId = "mac-samples", Name = "Xamarin.Mac", Platform = "macOS" }
+				new SampleRepository { SampleOwnerId = "xamarin", SampleRepositoryId = "monodroid-samples", Name = "Xamarin.Android", Platform = "Android" },
+				new SampleRepository { SampleOwnerId = "xamarin", SampleRepositoryId = "ios-samples", Name = "Xamarin.iOS", Platform = "iOS" },
+				new SampleRepository { SampleOwnerId = "xamarin", SampleRepositoryId = "xamarin-forms-samples", Name = "Xamarin.Forms", Platform = "Xamarin.Forms" },
+				new SampleRepository { SampleOwnerId = "xamarin", SampleRepositoryId = "mac-samples", Name = "Xamarin.Mac", Platform = "macOS" },
+				new SampleRepository { SampleOwnerId = "jsuarezruiz", SampleRepositoryId = "SamplesImporter-Community", Name = "Community", Platform = "Android, iOS, Xamarin.Forms, macOS" }
 			};
 		}
 
 		public async Task<List<Sample>> GetSamplesAsync(
+			string sampleOwnerId,
 			string sampleRepositoryId, 
 			CancellationToken cancellationToken)
 		{
@@ -50,7 +52,7 @@ namespace VS4Mac.SamplesImporter.Services
 
 			try
 			{
-				var repository = await _client.Repository.Get("xamarin", sampleRepositoryId);
+				var repository = await _client.Repository.Get(sampleOwnerId, sampleRepositoryId);
 
 				var folders = await _client.Repository.Content.GetAllContents(repository.Id);
 
