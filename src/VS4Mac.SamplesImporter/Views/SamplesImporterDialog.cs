@@ -45,7 +45,9 @@ namespace VS4Mac.SamplesImporter.Views
         VBox _platformsBox;
         Label _tagsLabel;
         HBox _tagsBox;
-        VBox _previewBox;
+		Label _authorTitleLabel;
+		Label _authorLabel;
+		VBox _previewBox;
         Xwt.ImageView _previewView;
 		MDSpinner _loadingSpinner;
         HBox _buttonBox;
@@ -164,7 +166,15 @@ namespace VS4Mac.SamplesImporter.Views
 
             _tagsBox = new HBox();
 
-            _previewBox = new VBox
+			_authorTitleLabel = new Label("Author")
+			{
+				Font = Font.SystemFont.WithScaledSize(1.25),
+				Margin = new WidgetSpacing(0, 12, 0, 0)
+			};
+
+			_authorLabel = new Label();
+
+			_previewBox = new VBox
             {
                 WidthRequest = 300
             };
@@ -212,8 +222,10 @@ namespace VS4Mac.SamplesImporter.Views
             _descriptionBox.PackStart(_platformsBox);
             _descriptionBox.PackStart(_tagsLabel);
             _descriptionBox.PackStart(_tagsBox);
+			_descriptionBox.PackStart(_authorTitleLabel);
+			_descriptionBox.PackStart(_authorLabel);
 
-            _previewBox.PackStart(_previewView);
+			_previewBox.PackStart(_previewView);
 
 			_contentBox.PackStart(_loadingSpinner, true, WidgetPlacement.Center);
 			_contentBox.PackStart(_samplesView, false);
@@ -312,6 +324,8 @@ namespace VS4Mac.SamplesImporter.Views
             _titleValueLabel.Text = _controller.SelectedSample.Name;
             _descriptionValueLabel.Text = _controller.SelectedSample.Brief;
 
+			_authorTitleLabel.Visible = false;
+			_authorLabel.Visible = false;
 			_platformsBox.Clear();
 
             if (!string.IsNullOrEmpty(_controller.SelectedSample.SupportedPlatforms))
@@ -349,7 +363,14 @@ namespace VS4Mac.SamplesImporter.Views
                 }
             }
 
-            _continueButton.Sensitive = !string.IsNullOrEmpty(_controller.SelectedSample.Url);
+			if(!string.IsNullOrEmpty(_controller.SelectedSample.Author))
+			{
+				_authorTitleLabel.Visible = true;
+				_authorLabel.Visible = true;
+				_authorLabel.Text = _controller.SelectedSample.Author;
+			}
+
+			_continueButton.Sensitive = !string.IsNullOrEmpty(_controller.SelectedSample.Url);
 
 			_previewView.Image = null;
 
