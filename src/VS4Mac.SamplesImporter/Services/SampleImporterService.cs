@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoDevelop.Core;
@@ -135,7 +136,7 @@ namespace VS4Mac.SamplesImporter.Services
 				LoggingService.LogError("Getting sample pictures failed.", ex);
 			}
 
-			return pictures;
+			return pictures;		
 		}
 
 		public async Task<List<RepositoryContent>> GetSampleContentAsync(Sample sample)
@@ -157,6 +158,25 @@ namespace VS4Mac.SamplesImporter.Services
 			}
 
 			return content;
+		}
+
+		public async Task DownloadSampleAsync(Uri requestUri, string filename)
+		{
+			if (filename == null)
+				throw new ArgumentNullException(nameof(filename));
+
+			using (var httpClient = new HttpClient())
+			{
+				using (var request = new HttpRequestMessage(HttpMethod.Get, requestUri))
+				{
+					using (
+						Stream contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync(),
+						stream = new FileStream(filename, System.IO.FileMode.Create, FileAccess.Write, FileShare.None, 1024, true))
+					{
+						await contentStream.CopyToAsync(stream);
+					}
+				}
+			}
 		}
 
 		internal async Task AddChildItemsAsync(List<RepositoryContent> content, long repositoryId, string path)

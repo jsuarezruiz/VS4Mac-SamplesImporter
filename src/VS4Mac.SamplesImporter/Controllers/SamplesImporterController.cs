@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -85,6 +86,8 @@ namespace VS4Mac.SamplesImporter.Controllers
 			SelectedSample.SupportedPlatforms = sampleDetails.SupportedPlatforms;
 			SelectedSample.Tags = sampleDetails.Tags;
 			SelectedSample.Brief = sampleDetails.Brief;
+			SelectedSample.DownloadUrl = sampleDetails.DownloadUrl;
+			SelectedSample.Author = sampleDetails.Author;
 
 			await LoadSamplePicturesAsync();
 		}
@@ -133,39 +136,68 @@ namespace VS4Mac.SamplesImporter.Controllers
             {
 				string projectPath = string.Empty;
 
-				var content = await _sampleImporterService.GetSampleContentAsync(SelectedSample);
-
-				progressMonitor?.BeginTask("Downloading...", content.Count);
-
-				var folders = content.Where(c => c.Type == ContentType.Dir);
-
-				foreach(var folder in folders)
+				if (!string.IsNullOrEmpty(SelectedSample.DownloadUrl))
 				{
-					string directoryPath = Path.Combine(_projectsPath, folder.Path);
+					progressMonitor?.BeginTask("Downloading...", 1);
 
-					if (!Directory.Exists(directoryPath))
+					string zipProjectPath = Path.Combine(UserProfile.Current.TempDir, $"{SelectedSample.Name}.zip");
+					projectPath = Path.Combine(UserProfile.Current.TempDir, SelectedSample.Name);
+
+					if (!File.Exists(zipProjectPath))
 					{
-						progressMonitor?.Step();
-						progressMonitor?.Log.WriteLine("Creating folder" + ": " + directoryPath);
-						Directory.CreateDirectory(directoryPath);
+						await _sampleImporterService.DownloadSampleAsync(new Uri(SelectedSample.DownloadUrl), zipProjectPath);
 					}
-				}
 
-				var files = content.Where(c => c.Type == ContentType.File);
-
-				foreach (var file in files)
-				{
-					string filePath = Path.Combine(_projectsPath, file.Path);
 					progressMonitor?.Step();
-					progressMonitor?.Log.WriteLine("Downloading file" + ": " + filePath);
-					await _downloaderService.DownloadFileAsync(file.DownloadUrl, filePath, CancellationToken.None);
+
+					if (!Directory.Exists(projectPath))
+					{
+						Directory.CreateDirectory(projectPath);
+						ZipFile.ExtractToDirectory(zipProjectPath, projectPath);
+					}
+
+					var solutions = Directory.GetFiles(projectPath, "*.sln", SearchOption.AllDirectories);
+					var solution = solutions.FirstOrDefault();
+
+					if (!string.IsNullOrEmpty(solution))
+						projectPath = solution;
 				}
-
-				var projectFile = files.FirstOrDefault(c => c.Path.EndsWith(".sln", StringComparison.InvariantCultureIgnoreCase));
-
-				if (projectFile != null)
+				else
 				{
-					projectPath = Path.Combine(_projectsPath, projectFile.Path);
+					var content = await _sampleImporterService.GetSampleContentAsync(SelectedSample);
+
+					progressMonitor?.BeginTask("Downloading...", content.Count);
+
+					var folders = content.Where(c => c.Type == ContentType.Dir);
+
+					foreach (var folder in folders)
+					{
+						string directoryPath = Path.Combine(_projectsPath, folder.Path);
+
+						if (!Directory.Exists(directoryPath))
+						{
+							progressMonitor?.Step();
+							progressMonitor?.Log.WriteLine("Creating folder" + ": " + directoryPath);
+							Directory.CreateDirectory(directoryPath);
+						}
+					}
+
+					var files = content.Where(c => c.Type == ContentType.File);
+
+					foreach (var file in files)
+					{
+						string filePath = Path.Combine(_projectsPath, file.Path);
+						progressMonitor?.Step();
+						progressMonitor?.Log.WriteLine("Downloading file" + ": " + filePath);
+						await _downloaderService.DownloadFileAsync(file.DownloadUrl, filePath, CancellationToken.None);
+					}
+
+					var projectFile = files.FirstOrDefault(c => c.Path.EndsWith(".sln", StringComparison.InvariantCultureIgnoreCase));
+
+					if (projectFile != null)
+					{
+						projectPath = Path.Combine(_projectsPath, projectFile.Path);
+					}
 				}
 
 				return projectPath;
