@@ -31,6 +31,10 @@ namespace VS4Mac.SamplesImporter.Models
 		public string Gallery { get; set; }
 		[XmlElement(ElementName = "Brief")]
 		public string Brief { get; set; }
+		[XmlElement(ElementName = "DownloadUrl")]
+		public string DownloadUrl { get; set; }
+		[XmlElement(ElementName = "Author")]
+		public string Author { get; set; }
 
 		public long RepositoryId { get; set; }
 		public string Folder { get; set; }
